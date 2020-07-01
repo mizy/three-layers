@@ -1,0 +1,46 @@
+{
+  "name": "@tntv/layers",
+  "version": "1.1.6",
+  "description": "tntv effect layers use three.js",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "webpack -p",
+    "start": "webpack-dev-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.tongdun.cn:ued/tntv-layers.git"
+  },
+  "keywords": [
+    "three.js",
+    "flyline",
+    "effects"
+  ],
+  "files": [
+    "demo",
+    "images",
+    "dist"
+  ],
+  "author": "mizy.mz",
+  "license": "ISC",
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "earcut": "^2.2.2",
+    "geojson-decoder": "^1.0.1",
+    "three": "^0.115.0"
+  },
+  "devDependencies": {
+    "webpack": "^4.43.0",
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/plugin-proposal-decorators": "^7.8.3",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-syntax-import-meta": "^7.8.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.9.0",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babel-loader": "^8.1.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-dev-server": "^3.10.3"
+  }
+}

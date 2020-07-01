@@ -1,0 +1,93 @@
+<html>
+	<head></head>
+	<script src="/index.js"></script>
+	<script src="../orbitControl.js"></script>
+
+	<body>
+		<!-- <svg width="500" height="500">
+			<path stroke="red"  d="M100 250 C0 100 500 100 400 250"></path>
+			<path stroke="blue"  d="M100 250 L0 200 L500 200 L400 250" fill="transparent"> </path>
+		</svg> -->
+	</body>
+	
+	<script>
+		const {Column} = window.TNTVLayers;
+		let mesh;
+		//测试函数
+		function main(){
+			const texture = new THREE.TextureLoader().load( "../tube.jpg" );
+			texture.wrapS = THREE.RepeatWrapping;
+			mesh = new Column({
+				radius:1,
+				// center:new THREE.Vector3(0,0,0),
+				materialConfig:{
+					
+				}
+			});
+
+			scene.add(mesh);
+			const data = [];
+			for(let i = 0;i<100;i++){
+				data.push({
+					position:{
+						x:1000*Math.random() - 500,
+						y:1000*Math.random() - 500,
+						z:0
+					},
+					// position:convertxy(2*Math.random()*Math.PI,2*Math.random()*Math.PI),
+					height:Math.random()*100,
+					color:`rgb(${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)},${Math.floor(Math.random()*255)})`
+				})
+			}
+			mesh.setData(data);
+		}
+
+		// a 平面转角，b,z轴转角
+		function convertxy(a,b){
+			const x = 100*Math.sin(b)*Math.cos(a);
+			const y = 100*Math.sin(b)*Math.sin(a);
+			const z = 100*Math.cos(b);
+			return new THREE.Vector3(x,y,z)
+		}
+
+		var scene = new THREE.Scene();
+		var camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 10000 );
+	
+		var renderer = new THREE.WebGLRenderer({antialias :true});
+		renderer.setSize( window.innerWidth, window.innerHeight );
+		document.body.appendChild( renderer.domElement );
+		var controls = new THREE.OrbitControls( camera, renderer.domElement );
+		// controls.autoRotate = true;
+		camera.position.set( 0, 0, 200 );
+		controls.update();
+		
+		var geometry = new THREE.PlaneGeometry(1000,1000,);
+		var material = new THREE.MeshPhongMaterial( { color: 0x00aabb } );
+		var cube = new THREE.Mesh( geometry, material );
+		scene.add( cube );
+		var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
+		directionalLight.position.set(0,1,1);
+		scene.add( directionalLight );
+		var light = new THREE.AmbientLight( 0xffffff ); // soft white light
+		scene.add( light );
+		var axesHelper = new THREE.AxesHelper( 1000 );
+		scene.add( axesHelper );
+		// camera.position.z = 200;
+
+		var animate = function () {
+			requestAnimationFrame( animate );
+			// cube.rotation.x += 0.01;
+			// cube.rotation.y += 0.01;
+			if(!window.pause){
+			}
+
+			controls.update();
+			renderer.render( scene, camera );
+			
+		};
+		main();
+
+		animate();
+
+	</script>
+</html>
