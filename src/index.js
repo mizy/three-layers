@@ -22,6 +22,10 @@ const Layers = {
 	GeoJSON,
 	Earth,
 	OBJLoader,
-	MTLLoader
+	MTLLoader,
+	Lines:{
+		MeterLine:require("./Lines/MeterLine"),
+		RoundLine:require("./Lines/RoundLine")
+	}
 }
 export default Layers;
