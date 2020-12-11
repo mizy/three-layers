@@ -3,7 +3,7 @@
 	<script src="/index.js"></script>
 	<script src="../orbitControl.js"></script>
 
-	<body>
+	<body style="">
 		<!-- <svg width="500" height="500">
 			<path stroke="red"  d="M100 250 C0 100 500 100 400 250"></path>
 			<path stroke="blue"  d="M100 250 L0 200 L500 200 L400 250" fill="transparent"> </path>
@@ -16,16 +16,23 @@
 		//测试函数
 		function main(){
 			const loader = new OBJLoader();
-			loader.basicMaterial = new THREE.MeshPhongMaterial({color:"#aacefa"});
 			
-			new MTLLoader().load("./门架.mtl",(materials)=>{
+			new MTLLoader().load("./test.mtl",(materials)=>{
+				materials.materials.default = new THREE.MeshPhysicalMaterial( {
+					color: new THREE.Color().setHSL( 0.5, 0.5, 0.25 ),
+					metalness:0.9,
+					roughness: 0.5,
+					clearcoat: 1 ,
+					clearcoatRoughness: 0.1 ,
+					// reflectivity: 0.7,
+				} );
 				materials.preload();
-				new OBJLoader().setMaterials( materials ).load('./门架.obj',
+				new OBJLoader().setMaterials( materials ).load('./test.obj',
 					function ( object ) {
-						object.scale.set(0.05,0.025,0.025);
-						object.position.y = 1;
-						object.position.x = 10;
+						// object.scale.set(0.05,0.05,0.05);
 						object.children.map(item=>{
+							item.receiveShadow = true;
+
 							item.castShadow = true;
 							object.children.map(item=>{
 								item.castShadow = true;
@@ -35,47 +42,35 @@
 					},
 				);
 			});
-			new MTLLoader().load("./围栏.mtl",(materials)=>{
-				materials.preload();
-				new OBJLoader().setMaterials( materials ).load('./围栏.obj',
-					function ( object ) {
-						object.scale.set(0.05,0.025,0.025);
-						object.position.y = 0;
-						object.position.x = 10;
-						object.children.map(item=>{
-							item.castShadow = true;
-							object.children.map(item=>{
-								item.castShadow = true;
-							})
-						});
-						scene.add( object );
-					},
-				);
-			});
-			
 		}
 		
 		 
 
 		var scene = new THREE.Scene();
-		var camera = new THREE.PerspectiveCamera( 45, window.innerWidth/window.innerHeight, 0.1, 10000 );
+		var camera = new THREE.PerspectiveCamera( 90, window.innerWidth/window.innerHeight, 0.1, 10000 );
 	
-		var renderer = new THREE.WebGLRenderer({antialias :true});
+		var renderer = new THREE.WebGLRenderer({antialias :true,alpha:true});
 		renderer.setSize( window.innerWidth, window.innerHeight );
 		renderer.shadowMap.enabled = true;
-		renderer.shadowMap.type = THREE.BasicShadowMap;
+		renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+		renderer.outputEncoding = THREE.sRGBEncoding;
+		renderer.toneMapping = THREE.ACESFilmicToneMapping;
+		renderer.toneMappingExposure = 1.25;
 		document.body.appendChild( renderer.domElement );
+
+		
 		var controls = new THREE.OrbitControls( camera, renderer.domElement );
 		// controls.autoRotate = true;
 		controls.minDistance = 1;
 		controls.maxPolarAngle = Math.PI*0.95/2;
 		camera.position.set( 30, 30, 50 );
 		controls.update();
+		controls.autoRotate = true;
 	
-		var axesHelper = new THREE.AxesHelper( 3.75*2+3.5 );
-		scene.add( axesHelper );
-		var directionalLight = new THREE.DirectionalLight( 0xaacefa, 0.5 );
-		directionalLight.position.set(20,50,50);
+		// var axesHelper = new THREE.AxesHelper( 3.75*2+3.5 );
+		// scene.add( axesHelper );
+		var directionalLight = new THREE.DirectionalLight( 0xfafefa, 0.6 );
+		directionalLight.position.set(50,50,50);
 		directionalLight.castShadow = true;
 		directionalLight.shadow.camera.far = 2000;
 		var d = 50;
@@ -94,11 +89,11 @@
 		// scene.background = new THREE.Color( 0xcce0ff );
 		// scene.fog = new THREE.Fog( 0xffffff, 50, 1000 );
 		
-		const plane = new THREE.Mesh(new THREE.PlaneGeometry(10000,10000),new THREE.MeshLambertMaterial({color:"#555665"}))
-		plane.rotation.x = -Math.PI/2;
-		plane.position.z = -0.15;
-		plane.receiveShadow = true;
-		scene.add(plane)
+		// const plane = new THREE.Mesh(new THREE.PlaneGeometry(10000,10000),new THREE.MeshLambertMaterial({color:"#555665"}))
+		// plane.rotation.x = -Math.PI/2;
+		// plane.position.z = -0.15;
+		// plane.receiveShadow = true;
+		// scene.add(plane)
 
 		var animate = function () {
 			requestAnimationFrame( animate );
