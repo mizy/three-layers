@@ -17,17 +17,17 @@
 		function main(){
 			const loader = new OBJLoader();
 			
-			new MTLLoader().load("./test.mtl",(materials)=>{
-				materials.materials.default = new THREE.MeshPhysicalMaterial( {
-					color: new THREE.Color().setHSL( 0.5, 0.5, 0.25 ),
-					metalness:0.9,
-					roughness: 0.5,
-					clearcoat: 1 ,
-					clearcoatRoughness: 0.1 ,
-					// reflectivity: 0.7,
-				} );
+			new MTLLoader().load("./收费站.mtl",(materials)=>{
+				// materials.materials.default = new THREE.MeshPhysicalMaterial( {
+				// 	color: new THREE.Color().setHSL( 0.5, 0.5, 0.25 ),
+				// 	metalness:0.9,
+				// 	roughness: 0.5,
+				// 	clearcoat: 1 ,
+				// 	clearcoatRoughness: 0.1 ,
+				// 	// reflectivity: 0.7,
+				// } );
 				materials.preload();
-				new OBJLoader().setMaterials( materials ).load('./test.obj',
+				new OBJLoader().setMaterials( materials ).load('./收费站.obj',
 					function ( object ) {
 						// object.scale.set(0.05,0.05,0.05);
 						object.children.map(item=>{
@@ -63,7 +63,7 @@
 		// controls.autoRotate = true;
 		controls.minDistance = 1;
 		controls.maxPolarAngle = Math.PI*0.95/2;
-		camera.position.set( 30, 30, 50 );
+		camera.position.set( 100, 100, 50 );
 		controls.update();
 		controls.autoRotate = true;
 	

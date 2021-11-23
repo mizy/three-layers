@@ -7,8 +7,8 @@ import Column from "./Column";
 import SphereWave from "./SphereWave";
 import GeoJSON from "./GeoJSON";
 import Earth from "./Earth";
-import OBJLoader from "./Loaders/OBJLoader";
-import MTLLoader from "./Loaders/MTLLoader";
+import {OBJLoader} from "three/examples/jsm/loaders/OBJLoader";
+import {MTLLoader} from "three/examples/jsm/loaders/MTLLoader";
 import * as THREE from 'three';
 window.THREE = THREE;
 const Layers = {

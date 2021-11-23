@@ -58,7 +58,6 @@
 		
 		var geometry = new THREE.SphereGeometry(100,64,64);
 		var material = new THREE.MeshPhongMaterial( { color: 0x00aabb,transparent:true,opacity:0.4 } );
-		var cube = new THREE.Mesh( geometry, material );
 		scene.add( cube );
 		var directionalLight = new THREE.DirectionalLight( 0xffffff, 0.5 );
 		directionalLight.position.set(0,1,1);

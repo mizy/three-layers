@@ -158,38 +158,7 @@ MeshLine.prototype.raycast = (function () {
 					});
 				}
 			}
-		} else if (geometry instanceof THREE.Geometry) {
-			var vertices = geometry.vertices;
-			var nbVertices = vertices.length;
-
-			for (var i = 0; i < nbVertices - 1; i += step) {
-				var distSq = ray.distanceSqToSegment(
-					vertices[i],
-					vertices[i + 1],
-					interRay,
-					interSegment
-				);
-
-				if (distSq > precisionSq) continue;
-
-				interRay.applyMatrix4(this.matrixWorld); //Move back to world space for distance calculation
-
-				var distance = raycaster.ray.origin.distanceTo(interRay);
-
-				if (distance < raycaster.near || distance > raycaster.far) continue;
-
-				intersects.push({
-					distance: distance,
-					// What do we want? intersection point on the ray or on the segment??
-					// point: raycaster.ray.at( distance ),
-					point: interSegment.clone().applyMatrix4(this.matrixWorld),
-					index: i,
-					face: null,
-					faceIndex: null,
-					object: this,
-				});
-			}
-		}
+		} 
 	};
 })();
 
@@ -526,9 +495,13 @@ THREE.ShaderChunk["meshline_frag"] = [
 	"}",
 ].join("\r\n");
 
-function MeshLineMaterial(parameters) {
-	THREE.ShaderMaterial.call(this, {
-		uniforms: Object.assign({}, THREE.UniformsLib.fog, {
+class MeshLineMaterial extends THREE.ShaderMaterial{
+    vertexShader= THREE.ShaderChunk.meshline_vert;
+    fragmentShader= THREE.ShaderChunk.meshline_frag;
+    isMeshLineMaterial=true;
+    constructor(parameters) {
+	    super(parameters);
+		this.uniforms = Object.assign({}, THREE.UniformsLib.fog, {
 			lineWidth: { value: 1 },
 			lineLength: { value: 0 },
 			start: { value: 0 },
@@ -552,211 +525,204 @@ function MeshLineMaterial(parameters) {
 			alphaTest: { value: 0 },
 			repeat: { value: new THREE.Vector2(1, 1) },
 		}),
+	    this.type = "MeshLineMaterial";
+        Object.defineProperties(this, {
+            lineWidth: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.lineWidth.value;
+                },
+                set: function (value) {
+                    this.uniforms.lineWidth.value = value;
+                },
+            },
+            map: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.map.value;
+                },
+                set: function (value) {
+                    this.uniforms.map.value = value;
+                },
+            },
+            useMap: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.useMap.value;
+                },
+                set: function (value) {
+                    this.uniforms.useMap.value = value;
+                },
+            },
+            alphaMap: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.alphaMap.value;
+                },
+                set: function (value) {
+                    this.uniforms.alphaMap.value = value;
+                },
+            },
+            useAlphaMap: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.useAlphaMap.value;
+                },
+                set: function (value) {
+                    this.uniforms.useAlphaMap.value = value;
+                },
+            },
+            color: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.color.value;
+                },
+                set: function (value) {
+                    this.uniforms.color.value = value;
+                },
+            },
+            opacity: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.opacity.value;
+                },
+                set: function (value) {
+                    this.uniforms.opacity.value = value;
+                },
+            },
+            resolution: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.resolution.value;
+                },
+                set: function (value) {
+                    this.uniforms.resolution.value.copy(value);
+                },
+            },
+            sizeAttenuation: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.sizeAttenuation.value;
+                },
+                set: function (value) {
+                    this.uniforms.sizeAttenuation.value = value;
+                },
+            },
+            near: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.near.value;
+                },
+                set: function (value) {
+                    this.uniforms.near.value = value;
+                },
+            },
+            far: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.far.value;
+                },
+                set: function (value) {
+                    this.uniforms.far.value = value;
+                },
+            },
+            dashArray: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.dashArray.value;
+                },
+                set: function (value) {
+                    this.uniforms.dashArray.value = value;
+                    this.useDash = value !== 0 ? 1 : 0;
+                },
+            },
+            dashOffset: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.dashOffset.value;
+                },
+                set: function (value) {
+                    this.uniforms.dashOffset.value = value;
+                },
+            },
+            dashRatio: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.dashRatio.value;
+                },
+                set: function (value) {
+                    this.uniforms.dashRatio.value = value;
+                },
+            },
+            useDash: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.useDash.value;
+                },
+                set: function (value) {
+                    this.uniforms.useDash.value = value;
+                },
+            },
+            visibility: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.visibility.value;
+                },
+                set: function (value) {
+                    this.uniforms.visibility.value = value;
+                },
+            },
+            alphaTest: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.alphaTest.value;
+                },
+                set: function (value) {
+                    this.uniforms.alphaTest.value = value;
+                },
+            },
+            repeat: {
+                enumerable: true,
+                get: function () {
+                    return this.uniforms.repeat.value;
+                },
+                set: function (value) {
+                    this.uniforms.repeat.value.copy(value);
+                },
+            },
+        });
+    
+        this.setValues(parameters);
+		
+	};
 
-		vertexShader: THREE.ShaderChunk.meshline_vert,
-
-		fragmentShader: THREE.ShaderChunk.meshline_frag,
-	});
-
-	this.type = "MeshLineMaterial";
-
-	Object.defineProperties(this, {
-		lineWidth: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.lineWidth.value;
-			},
-			set: function (value) {
-				this.uniforms.lineWidth.value = value;
-			},
-		},
-		map: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.map.value;
-			},
-			set: function (value) {
-				this.uniforms.map.value = value;
-			},
-		},
-		useMap: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.useMap.value;
-			},
-			set: function (value) {
-				this.uniforms.useMap.value = value;
-			},
-		},
-		alphaMap: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.alphaMap.value;
-			},
-			set: function (value) {
-				this.uniforms.alphaMap.value = value;
-			},
-		},
-		useAlphaMap: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.useAlphaMap.value;
-			},
-			set: function (value) {
-				this.uniforms.useAlphaMap.value = value;
-			},
-		},
-		color: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.color.value;
-			},
-			set: function (value) {
-				this.uniforms.color.value = value;
-			},
-		},
-		opacity: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.opacity.value;
-			},
-			set: function (value) {
-				this.uniforms.opacity.value = value;
-			},
-		},
-		resolution: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.resolution.value;
-			},
-			set: function (value) {
-				this.uniforms.resolution.value.copy(value);
-			},
-		},
-		sizeAttenuation: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.sizeAttenuation.value;
-			},
-			set: function (value) {
-				this.uniforms.sizeAttenuation.value = value;
-			},
-		},
-		near: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.near.value;
-			},
-			set: function (value) {
-				this.uniforms.near.value = value;
-			},
-		},
-		far: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.far.value;
-			},
-			set: function (value) {
-				this.uniforms.far.value = value;
-			},
-		},
-		dashArray: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.dashArray.value;
-			},
-			set: function (value) {
-				this.uniforms.dashArray.value = value;
-				this.useDash = value !== 0 ? 1 : 0;
-			},
-		},
-		dashOffset: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.dashOffset.value;
-			},
-			set: function (value) {
-				this.uniforms.dashOffset.value = value;
-			},
-		},
-		dashRatio: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.dashRatio.value;
-			},
-			set: function (value) {
-				this.uniforms.dashRatio.value = value;
-			},
-		},
-		useDash: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.useDash.value;
-			},
-			set: function (value) {
-				this.uniforms.useDash.value = value;
-			},
-		},
-		visibility: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.visibility.value;
-			},
-			set: function (value) {
-				this.uniforms.visibility.value = value;
-			},
-		},
-		alphaTest: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.alphaTest.value;
-			},
-			set: function (value) {
-				this.uniforms.alphaTest.value = value;
-			},
-		},
-		repeat: {
-			enumerable: true,
-			get: function () {
-				return this.uniforms.repeat.value;
-			},
-			set: function (value) {
-				this.uniforms.repeat.value.copy(value);
-			},
-		},
-	});
-
-	this.setValues(parameters);
+    copy = function (source) {
+        THREE.ShaderMaterial.prototype.copy.call(this, source);
+    
+        this.lineWidth = source.lineWidth;
+        this.map = source.map;
+        this.useMap = source.useMap;
+        this.alphaMap = source.alphaMap;
+        this.useAlphaMap = source.useAlphaMap;
+        this.color.copy(source.color);
+        this.opacity = source.opacity;
+        this.resolution.copy(source.resolution);
+        this.sizeAttenuation = source.sizeAttenuation;
+        this.near = source.near;
+        this.far = source.far;
+        this.dashArray = source.dashArray;
+        this.dashOffset = source.dashOffset;
+        this.dashRatio= source.dashRatio;
+        this.useDash = source.useDash;
+        this.visibility = source.visibility;
+        this.alphaTest = source.alphaTest;
+        this.repeat.copy(source.repeat);
+    
+        return this;
+    };
+	
 }
 
-MeshLineMaterial.prototype = Object.create(THREE.ShaderMaterial.prototype);
-MeshLineMaterial.prototype.constructor = MeshLineMaterial;
-MeshLineMaterial.prototype.isMeshLineMaterial = true;
-
-MeshLineMaterial.prototype.copy = function (source) {
-	THREE.ShaderMaterial.prototype.copy.call(this, source);
-
-	this.lineWidth = source.lineWidth;
-	this.map = source.map;
-	this.useMap = source.useMap;
-	this.alphaMap = source.alphaMap;
-	this.useAlphaMap = source.useAlphaMap;
-	this.color.copy(source.color);
-	this.opacity = source.opacity;
-	this.resolution.copy(source.resolution);
-	this.sizeAttenuation = source.sizeAttenuation;
-	this.near = source.near;
-	this.far = source.far;
-	this.dashArray = source.dashArray;
-	this.dashOffset = source.dashOffset;
-	this.dashRatio= source.dashRatio;
-	this.useDash = source.useDash;
-	this.visibility = source.visibility;
-	this.alphaTest = source.alphaTest;
-	this.repeat.copy(source.repeat);
-
-	return this;
-};
 
 
 export{

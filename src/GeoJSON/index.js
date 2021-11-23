@@ -92,7 +92,6 @@ class GeoJSON {
 					const newIndexs = allIndexs.map((item) => {
 						return item + points.length/3;
 					});
-					console.log(nowPoints,newIndexs)
 					points = [...points, ...nowPoints];
 					indexs = [...indexs, ...newIndexs];
 				});
