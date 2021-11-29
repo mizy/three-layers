@@ -1,103 +1,90 @@
 import * as THREE from 'three';
-import WaveMaterial from './WaveMaterial.js';
-class SphereCircle extends THREE.Group{
-	
-	constructor(config={}){
-		super(config);
-		this.config = { 
-			maxRangeRadius:10,
-			radius:100,//半径 
-			segments:64,
-			speed:0.05,
-			center:config.center||new THREE.Vector3(0,0,0),
-		...config};
-		this.materialConfig = {
-			startColor:this.config.startColor,
-			endColor:this.config.endColor,
-			radius:this.config.radius,
-			minOpacity:this.config.minOpacity,
-			centerNormal:this.config.center,
-			...config.materialConfig
-		}
-		this.waves = []; 
-		this.waveMaterial = new WaveMaterial(this.materialConfig); 
-	}
-	
-	setData(data){
-		this.data = data;
-		this.waves.forEach(line=>{
-			line.geometry.dispose();
-		})
-		const {center,radius,segments,maxRangeRadius} = this.config;
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import Avadar from './Avadar';
 
-		//{position:{x,y,z}}
-		data.forEach(item=>{
-			const {position,startRadius} = item;
-			const positionVector = new THREE.Vector3(position.x,position.y,position.z);
+class Meta {
 
-			// 计算球上切面的点所提前需要计算好的两个independent的空间的基
-			const toCenter = new THREE.Vector3(position.x - center.x,position.y-center.y,position.z-center.z);
-			const xNormal = new THREE.Vector3(0,toCenter.z,-toCenter.y).normalize();
-			const toCenterNormal = toCenter.clone().normalize();
-			const yNormal = new THREE.Vector3().crossVectors(xNormal,toCenterNormal).normalize();
+    constructor(config = {}) {
+        this.config = {
+            ...config
+        };
+        this.init();
+    }
 
-			const geometry = new THREE.BufferGeometry();
-			const material = this.waveMaterial.clone();
+    async init() {
+        this.camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100);
+        this.camera.lookAt(0, 0, 0);
+        this.camera.position.set(50, 50, 50)
+        this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(0xffffff);
 
-			// 配置初始动量
-			material.uniforms.centerNormal.value = positionVector.normalize();
-			material.uniforms.r.value = startRadius||(maxRangeRadius*Math.random());
+        //sky
+        const hemiLight = new THREE.HemisphereLight();
+        hemiLight.intensity = 0.35;
+        this.scene.add(hemiLight);
 
-			const points = [position.x,position.y,position.z];// 中心点
-			const indices = [];
-			const numbers = [0];
-			for(let i =0;i<segments;i++){
-				const angle = Math.PI*2*i/segments;
-				
+        //light
+        const dirLight = new THREE.DirectionalLight(0xffffff, 1, 100);
+        dirLight.position.set(100, 100, 100);
+        dirLight.castShadow = true;
 
-				// 提前算好满圆时的每个点距离球心的向量，这样只需要控制t的比例就好了，不需要再shader中每帧计算
-				const normal = new THREE.Vector3().addVectors(xNormal.clone().multiplyScalar(Math.sin(angle)) , yNormal.clone().multiplyScalar(Math.cos(angle)));
+        this.scene.add(dirLight);
+        this.clock = new THREE.Clock();
 
-				points.push(normal.x,normal.y,normal.z);// 每个边距离圆心的集向量
-				numbers.push(i+1);
+        this.initRenderer();
+        this.initController();
+        this.initFloor();
+        this.avadar = new Avadar(this);
+        this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
-				if(i<segments-1)
-				indices.push(i+1,0,i+2);
-			}
-			indices.push(segments,0,1);
+        this.animate();
 
-			geometry.setAttribute("position",new THREE.BufferAttribute(new Float32Array(points),3));
-			geometry.setAttribute("number",new THREE.BufferAttribute(new Float32Array(numbers),1));
-			geometry.setIndex(indices);
-			const mesh = new THREE.Mesh(geometry,material);
-			mesh.data = item;
-			this.add(mesh);
-			this.waves.push(mesh);
-		})
-	}
+        //helper
+        const axesHelper = new THREE.AxesHelper(105);
+        this.scene.add(axesHelper);
+    }
 
-	// render中调用draw函数,更新飞线的飞行轨迹
-	update(delta){
-		const {maxRangeRadius,speed} = this.config;
-		this.waves.forEach(mesh=>{
-			const {material} = mesh;
-			material.uniforms.r.value += speed;
-			if(material.uniforms.r.value>maxRangeRadius){
-				material.uniforms.r.value = 0;
-			}
-			material.uniforms.opacity.value = Math.sin(Math.PI*(material.uniforms.r.value/maxRangeRadius));
-			material.uniformsNeedUpdate = true;
-		})
-	}
+    initController() {
+        // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    }
+
+    initFloor() {
+        const floorBox = new THREE.Mesh(
+            new THREE.BoxGeometry(200, 10, 200),
+            new THREE.ShadowMaterial({ color: 0xcccccc })
+        );
+        floorBox.receiveShadow = true;
+        floorBox.position.y = - 5;
+        this.scene.add(floorBox);
+        const box = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshPhongMaterial({ color: 0x3f0f5f })
+        );
+        box.castShadow = true;
+        box.receiveShadow = true;
+        box.position.y = 1;
+        box.position.x = 2;
+        this.scene.add(box)
+    }
 
 
-	dispose(){
-		this.data = undefined;
-		this.waves.forEach(line=>{
-			line.geometry.dispose();
-		})
-		this.waves = [];
-		this.waveMaterial.dispose();
-	}
+    initRenderer() {
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap
+        document.body.appendChild(this.renderer.domElement);
+    }
+
+    animate = () => {
+        const delta = this.clock.getDelta();
+        requestAnimationFrame(this.animate);
+        this.controls.update(delta);
+        this.avadar.update(delta)
+        this.renderer.render(this.scene, this.avadar.camera);
+    }
+
 }
-export default SphereCircle;
+export default Meta;
